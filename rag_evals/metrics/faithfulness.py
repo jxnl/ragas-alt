@@ -72,7 +72,7 @@ class FaithfulnessResult(BaseModel):
     statements: list[StatementEvaluation] = Field(description="A list of all statements extracted from the answer and their evaluation.")
 
     @property
-    def overall_faithfulness_score(self) -> float:
+    def score(self) -> float:
         if not self.statements:
             return 0.0
         supported_statements = sum(s.is_supported for s in self.statements)
@@ -95,7 +95,19 @@ Faithfulness = base.ContextEvaluation(
 
     ## Output Format:
     Your output MUST be a JSON object that adheres to the following structure:
-    {{ "statements": [ {{ "statement": "<The extracted claim from the answer>", "is_supported": <true_or_false>, "reasoning": "<Your brief reasoning>", "supporting_chunk_ids": [<id1>, <id2>, ...] }} , ... ] }}
+    ```json
+    {
+        "statements": [
+            {
+                "statement": "<The extracted claim from the answer>",
+                "is_supported": <true_or_false>,
+                "reasoning": "<Your brief reasoning>",
+                "supporting_chunk_ids": [<id1>, <id2>, ...]
+            },
+            // ... more statements
+        ]
+    }
+    ```
 
     - `statement`: The exact claim extracted from the generated answer.
     - `is_supported`: A boolean (true/false) indicating if the statement is supported by the context.

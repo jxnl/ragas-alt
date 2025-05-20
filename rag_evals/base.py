@@ -105,14 +105,14 @@ class ChunkGraded(BaseModel, ContextValidationMixin):
     graded_chunks: list[ChunkScore]
 
     @property 
-    def avg_score(self) -> float:
+    def score(self) -> float:
         return sum(chunk.score for chunk in self.graded_chunks) / len(self.graded_chunks)
 
 class ChunkGradedBinary(BaseModel, ContextValidationMixin):
     graded_chunks: list[ChunkBinaryScore]
 
     @property 
-    def avg_score(self) -> float:
+    def score(self) -> float:
         return sum(chunk.score for chunk in self.graded_chunks) / len(self.graded_chunks)
 
 class ContextEvaluation(BaseModel):
@@ -157,7 +157,7 @@ class ContextEvaluation(BaseModel):
         answer: str | None,
         context: list[Any],
         client: Instructor,
-    ) -> BaseModel:
+    ) -> ChunkGraded | ChunkGradedBinary:
         """Run an evaluation of a question and optional answer against provided context chunks.
 
         This method evaluates how well a question and its answer (if provided) relate to the given
