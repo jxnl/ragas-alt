@@ -60,6 +60,7 @@ nav:
   - Usage Guide:
     - usage/index.md
     - Customization: usage/customization.md
+    - Batch Evaluation: usage/batch_evaluation.md
     - Examples: usage/examples.md
     - Best Practices: usage/best_practices.md
     - Troubleshooting: usage/troubleshooting.md
