@@ -2,180 +2,48 @@
 
 This section provides detailed API documentation for the RAG Evals library.
 
-## Core Classes
+## Module Overview
 
-### ContextEvaluation
+The RAG Evals library consists of these key modules:
 
-`ContextEvaluation` is the base class for all context-based evaluations in RAG Evals.
+- **Base Module**: Core classes for evaluation infrastructure
+- **Metrics Module**: Implementations of specific evaluation metrics
+- **Utility Module**: Helper functions for processing evaluation results
 
-```python
-class ContextEvaluation(BaseModel):
-    """Base class for context-based evaluations that handles common patterns
-    including grading question, and optional answers against a context that is enumerated   
-    with an id.
-    
-    This class is designed to be used as a base class for specific evaluation classes.
-    It provides a common interface for evaluating questions and answers against a context.
-    """
-    
-    prompt: str
-    examples: list[Any] | None = None
-    response_model: type[BaseModel]
-    chunk_template: str = dedent("""
-        <evaluation>
-            {% if examples is not none %}
-            <examples>
-                {% for example in examples %}
-                <example>
-                    {{ example }}
-                </example>
-                {% endfor %}
-            {% endif %}
-            <question>{{ question }}</question>
-            {% if answer is not none %}
-            <answer>{{ answer }}</answer>
-            {% endif %}
-            <context>
-                {% for chunk in context %}
-                <chunk id="{{ chunk.id }}">
-                    {{ chunk.chunk }}
-                </chunk>
-                {% endfor %}
-            </context>
-        </evaluation>
-    """)
-```
+## Base Module
 
-#### Methods
+The base module provides the foundational classes for all RAG evaluations. For detailed documentation of all base classes, see:
 
-##### grade
+- [Base Classes API Reference](./base.md)
 
-```python
-def grade(
-    self,
-    question: str,
-    answer: str | None,
-    context: list[Any],
-    client: Instructor,
-) -> BaseModel:
-    """Run an evaluation of a question and optional answer against provided context chunks.
+### Core Classes Summary
 
-    Args:
-        question (str): The question being evaluated.
-        answer (Optional[str]): The answer to evaluate, if available. Can be None.
-        context (List[Any]): List of context chunks to evaluate against.
-        client (Instructor): An initialized Instructor client instance.
+- `ContextEvaluation`: Base class for all context-based evaluations
+- `ContextValidationMixin`: Validates chunk references against context
+- `ChunkScore`: Represents a continuous score for a chunk
+- `ChunkBinaryScore`: Represents a binary score (pass/fail) for a chunk
+- `ChunkGraded`: Container for graded chunks with continuous scores
+- `ChunkGradedBinary`: Container for graded chunks with binary scores
 
-    Returns:
-        BaseModel: An instance of the response_model containing the structured evaluation results.
-    """
-```
+## Metrics Module
 
-##### agrade
+The metrics module provides implementations of specific RAG evaluation metrics:
 
-```python
-async def agrade(
-    self,
-    question: str,
-    answer: str | None,
-    context: list[Any],
-    client: AsyncInstructor,
-) -> BaseModel:
-    """Run an evaluation of a question and optional answer against provided context chunks asynchronously.
+### Faithfulness
 
-    Args:   
-        question (str): The question being evaluated.   
-        answer (Optional[str]): The answer to evaluate, if available. Can be None.
-        context (List[Any]): List of context chunks to evaluate against.
-        client (AsyncInstructor): An initialized AsyncInstructor client instance.
-
-    Returns:
-        BaseModel: An instance of the response_model containing the structured evaluation results.
-    """
-```
-
-### ContextValidationMixin
-
-A mixin class that ensures the integrity of chunk references in RAG evaluations by validating that all chunk IDs correspond to actual context chunks.
-
-```python
-class ContextValidationMixin:
-    """Mixin class that ensures the integrity of chunk references in RAG evaluations
-    by validating that all chunk IDs correspond to actual context chunks."""
-    
-    @field_validator('graded_chunks')
-    @classmethod
-    def validate_chunks_against_context(cls, chunks: list[Any], info: ValidationInfo) -> list[Any]:
-        """Validate and process chunk IDs against context chunks."""
-```
-
-### ChunkScore
-
-Represents a score for a single context chunk.
-
-```python
-class ChunkScore(BaseModel):
-    id_chunk: int
-    score: float = Field(ge=0.0, le=1.0, description="Score from 0-1 indicating the precision of the chunk, lower is worse")
-```
-
-### ChunkBinaryScore
-
-Represents a binary (pass/fail) score for a single context chunk.
-
-```python
-class ChunkBinaryScore(BaseModel):
-    id_chunk: int
-    score: bool = Field(description="Whether the chunk is passed or failed")
-```
-
-### ChunkGraded
-
-Container for a list of graded chunks with a continuous score.
-
-```python
-class ChunkGraded(BaseModel, ContextValidationMixin):
-    graded_chunks: list[ChunkScore]
-
-    @property 
-    def avg_score(self) -> float:
-        return sum(chunk.score for chunk in self.graded_chunks) / len(self.graded_chunks)
-```
-
-### ChunkGradedBinary
-
-Container for a list of graded chunks with a binary score.
-
-```python
-class ChunkGradedBinary(BaseModel, ContextValidationMixin):
-    graded_chunks: list[ChunkBinaryScore]
-
-    @property 
-    def avg_score(self) -> float:
-        return sum(chunk.score for chunk in self.graded_chunks) / len(self.graded_chunks)
-```
-
-## Faithfulness Module
-
-### FaithfulnessResult
-
-The result of a faithfulness evaluation.
+Evaluates whether statements in the answer are supported by the context.
 
 ```python
 class FaithfulnessResult(BaseModel):
     statements: list[StatementEvaluation] = Field(description="A list of all statements extracted from the answer and their evaluation.")
 
     @property
-    def overall_faithfulness_score(self) -> float:
+    def score(self) -> float:
         if not self.statements:
             return 0.0
         supported_statements = sum(s.is_supported for s in self.statements)
         return supported_statements / len(self.statements)
 ```
-
-### StatementEvaluation
-
-Represents the evaluation of a single statement extracted from an answer.
 
 ```python
 class StatementEvaluation(BaseModel):
@@ -187,10 +55,6 @@ class StatementEvaluation(BaseModel):
     )
 ```
 
-### Faithfulness
-
-The main faithfulness evaluator.
-
 ```python
 Faithfulness = base.ContextEvaluation(
     prompt="""
@@ -200,18 +64,57 @@ Faithfulness = base.ContextEvaluation(
 )
 ```
 
-## Precision Module
+### Precision
 
-### ChunkPrecision
-
-The main context precision evaluator.
+Evaluates whether each context chunk is relevant to the question.
 
 ```python
 ChunkPrecision = base.ContextEvaluation(
     prompt = """
-    You are an expert evaluator assessing if a specific retrieved context chunk was utilized in generating a given answer...
+    You are an expert evaluator assessing if a specific retrieved context chunk is relevant to the original question...
     """, 
     response_model = base.ChunkGradedBinary
+)
+```
+
+### Relevance
+
+Evaluates how well the answer addresses the original question.
+
+```python
+class RelevanceScore(BaseModel):
+    """Represents the evaluation of answer relevance to the question."""
+    overall_score: float = Field(
+        ge=0.0, 
+        le=1.0, 
+        description="Score from 0-1 indicating the relevance of the answer to the question, higher is better"
+    )
+    topical_match: float = Field(
+        ge=0.0, 
+        le=1.0, 
+        description="Score from 0-1 indicating how well the answer's topic matches the question"
+    )
+    completeness: float = Field(
+        ge=0.0, 
+        le=1.0, 
+        description="Score from 0-1 indicating how completely the answer addresses all aspects of the question"
+    )
+    conciseness: float = Field(
+        ge=0.0, 
+        le=1.0, 
+        description="Score from 0-1 indicating how concise and focused the answer is without irrelevant information"
+    )
+    reasoning: str = Field(
+        description="Explanation of the reasoning behind the scores"
+    )
+```
+
+```python
+AnswerRelevance = base.ContextEvaluation(
+    prompt = """
+    You are an expert evaluator assessing how well an answer addresses the original question...
+    """,
+    response_model = RelevanceScore
 )
 ```
 
