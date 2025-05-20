@@ -64,12 +64,32 @@ For a comprehensive understanding of how different evaluation metrics relate to 
 
 This framework helps you understand the relationships between questions, context chunks, and answers, and how different evaluation metrics assess these relationships.
 
+### Context Recall
+
+Evaluates whether the generated answer includes all relevant information from the retrieved context.
+
+- **What it measures:** Does the **generated answer** include all the relevant information from the **retrieved context**? It identifies if important information from relevant chunks is missing from the answer.
+- **Focus:** The relationship is (Retrieved Context → Generated Answer).
+- **Input**: Question, Answer, Retrieved Context
+- **Output**: For each context chunk, assessment of relevance and inclusion in the answer, with details on missing information
+
+[Learn more about Context Recall](recall.md)
+
+### Chunk Utility
+
+Evaluates how useful each retrieved context chunk was for generating the answer to the user's question.
+
+- **What it measures:** How useful was each **retrieved context chunk** for generating the **answer** to the user's question? It provides a utility score for each chunk to identify which were most and least helpful.
+- **Focus:** The relationship is (Retrieved Context → Question → Generated Answer).
+- **Input**: Question, Answer, Retrieved Context
+- **Output**: Utility score and justification for each chunk, with overall utility score and identification of most/least useful chunks
+
+[Learn more about Chunk Utility](utility.md)
+
 ## Future Metrics
 
 Future releases of RAG Evals plan to include:
 
-- **Context Recall**: Evaluates if the retrieved context contains all information needed for an ideal answer
-- **Chunk Utility**: Assesses whether each retrieved chunk was actually used in generating the answer
 - **Citation Quality**: Measures how well the system attributes information to sources
 - **Response Coherence**: Evaluates the overall structure and flow of generated answers
 
