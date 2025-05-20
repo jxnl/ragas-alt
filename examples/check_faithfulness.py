@@ -9,16 +9,17 @@ This script includes examples of both high-scoring and low-scoring cases.
 """
 import instructor
 from rag_evals import Faithfulness, FaithfulnessResult
+import asyncio
 
 # Initialize the LLM client
 # For testing purposes we use the mock client, but in production you would use:
 # client = instructor.from_provider("openai/gpt-4o-mini")
 # Instead, we use a mock client that returns pre-defined results for testing
-client = instructor.from_provider("openai/gpt-4o-mini")
+client = instructor.from_provider("openai/gpt-4o-mini", async_client=True)
 
 # Example 1: High Faithfulness Score
 # All statements in the answer are directly supported by the context
-def test_high_faithfulness():
+async def test_high_faithfulness():
     question = "What are the benefits of exercise?"
     answer = "Regular exercise improves cardiovascular health and increases strength."
     context = [
@@ -27,7 +28,7 @@ def test_high_faithfulness():
         "The earliest Olympic games were held in Ancient Greece."
     ]
     
-    faithfulness_result = Faithfulness.grade(
+    faithfulness_result = await Faithfulness.grade(
         question=question,
         answer=answer,
         context=context,
@@ -44,7 +45,7 @@ def test_high_faithfulness():
     
 # Example 2: Mixed Faithfulness Score
 # Some statements are supported, others are not
-def test_mixed_faithfulness():
+async def test_mixed_faithfulness():
     question = "What are the benefits of meditation?"
     answer = "Meditation reduces stress, improves mental clarity, and cures all diseases."
     context = [
@@ -52,7 +53,7 @@ def test_mixed_faithfulness():
         "Studies indicate meditation can improve mental clarity and focus.",
         "The history of meditation dates back thousands of years."
     ]
-    faithfulness_result = Faithfulness.grade(
+    faithfulness_result = await Faithfulness.grade(
         question=question,
         answer=answer,
         context=context,
@@ -70,7 +71,7 @@ def test_mixed_faithfulness():
     
 # Example 3: Low Faithfulness Score
 # None of the statements are supported by the context
-def test_low_faithfulness():
+async def test_low_faithfulness():
     question = "What is quantum computing?"
     answer = "Quantum computing uses subatomic particles to process information at incredible speeds, making it the fastest form of computing available today."
     context = [
@@ -109,7 +110,10 @@ def test_low_faithfulness():
     print(f"Faithfulness Score: {faithfulness_result.score}")
     # Faithfulness Score: 0.0
 
+async def main():
+    await test_high_faithfulness()
+    await test_mixed_faithfulness()
+    await test_low_faithfulness()
+
 if __name__ == "__main__":
-    test_high_faithfulness()
-    test_mixed_faithfulness()
-    test_low_faithfulness()
+    asyncio.run(main())

@@ -10,16 +10,17 @@ This script includes examples of high, mixed, and low precision scores.
 import instructor
 from rag_evals.metrics.precision import ChunkPrecision
 from rag_evals.base import ChunkGradedBinary, ChunkBinaryScore # Added for explicit result construction
+import asyncio
 
 # Initialize the LLM client
 # For testing purposes we use the mock client, but in production you would use:
 # client = instructor.from_provider("openai/gpt-4o-mini")
 # Instead, we use a mock client that returns pre-defined results for testing
-client = instructor.from_provider("openai/gpt-4o-mini")
+client = instructor.from_provider("openai/gpt-4o-mini", async_client=True)
 
 # Example 1: High Precision Score
 # All retrieved context chunks are relevant to the question.
-def test_high_precision():
+async def test_high_precision():
     question = "What are the primary colors?"
     # Answer is not strictly needed for ChunkPrecision but often available
     answer = "The primary colors are red, yellow, and blue." 
@@ -30,7 +31,7 @@ def test_high_precision():
         "Green is a secondary color, made by mixing blue and yellow."
     ]
     
-    precision_result = ChunkPrecision.grade(
+    precision_result = await ChunkPrecision.grade(
         question=question,
         answer=answer, # Though not used by the metric, it's part of the signature
         context=context,
@@ -68,7 +69,7 @@ def test_high_precision():
 
 # Example 2: Mixed Precision Score
 # Some retrieved chunks are relevant, others are not.
-def test_mixed_precision():
+async def test_mixed_precision():
     question = "Tell me about the Eiffel Tower."
     answer = "The Eiffel Tower is a famous landmark in Paris."
     context = [
@@ -78,7 +79,7 @@ def test_mixed_precision():
         "Paris is also known for the Louvre Museum, home to the Mona Lisa.", # Less relevant
         "The primary colors are red, yellow, and blue." # Irrelevant
     ]
-    precision_result = ChunkPrecision.grade(
+    precision_result = await ChunkPrecision.grade(
         question=question,
         answer=answer,
         context=context,
@@ -100,7 +101,7 @@ def test_mixed_precision():
 
 # Example 3: Low Precision Score
 # Most or all retrieved chunks are not relevant to the question.
-def test_low_precision():
+async def test_low_precision():
     question = "What is the capital of Japan?"
     answer = "The capital of Japan is Tokyo."
     context = [
@@ -116,7 +117,7 @@ def test_low_precision():
     # For this example, we'll call .grade() and print the result.
     # In a real unit test, you would mock 'client.chat.completions.create'.
     
-    precision_result = ChunkPrecision.grade(
+    precision_result = await ChunkPrecision.grade(
         question=question,
         answer=answer,
         context=context,
@@ -134,7 +135,10 @@ def test_low_precision():
     print(f"Precision Score: {precision_result.score}")
     # Expected: 0.0
 
+async def main():
+    await test_high_precision()
+    await test_mixed_precision()
+    await test_low_precision() 
+
 if __name__ == "__main__":
-    test_high_precision()
-    test_mixed_precision()
-    test_low_precision() 
+    asyncio.run(main()) 
