@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install uv
+      run: |
+        pip install uv
+    
+    - name: Install dependencies
+      run: |
+        uv pip install -e ".[test,lint]"
+    
+    - name: Lint with ruff
+      run: |
+        ruff check rag_evals tests
+    
+    - name: Type check with mypy
+      run: |
+        mypy rag_evals
+    
+    # We run tests with mocks since GitHub Actions won't have OpenAI API keys
+    - name: Test with pytest (mocked)
+      run: |
+        pytest tests/ -v
