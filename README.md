@@ -1,67 +1,72 @@
-# RAG Evals: Retrieval Augmented Generation
-
-Provides simple, modular primitives for evaluating RAG systems using LLMs.
-
-## Philosophy
-
-From the creator of [Instructor](https://github.com/jxnl/instructor): RAG Evals is built on the principle that RAG evaluation doesn't need to be complex. While many RAG evaluation frameworks require extensive infrastructure and setup, this project aims to provide:
-
-- **Simple Primitives**: Just the essential building blocks you need
-- **Flexible Implementation**: Easily customizable prompts and evaluation logic
-- **No Infrastructure Lock-in**: Run evaluations in your existing environment
-- **LLM Flexibility**: Use any LLM that works with Instructor
-
-Similar to [Instructor](https://github.com/jxnl/instructor), RAG Evals focuses on providing the fundamental tools that companies need without imposing unnecessary complexity or infrastructure requirements.
+# RAG Evals Repository Guide
 
 ## Overview
 
-RAG Evals helps you evaluate the quality of your RAG (Retrieval Augmented Generation) systems across several crucial dimensions:
+This repository provides simple, modular primitives for evaluating RAG (Retrieval Augmented Generation) systems using LLMs. Created by the author of Instructor, it focuses on lightweight evaluation that doesn't require extensive infrastructure.
 
-- How truthful are your answers? (Faithfulness)
-- Are your retrieved chunks actually used? (Context Precision)
+## Philosophy
 
-### Key Features
+RAG Evals is built on the principle that RAG evaluation doesn't need to be complex. Key principles:
 
-- **LLM-Powered Evaluation**: Uses language models to perform nuanced assessments
-- **Structured Output**: Leverages [Instructor](https://github.com/jxnl/instructor) and Pydantic for type-safe results
-- **Modifiable Prompts**: All evaluation logic is in prompts you can easily customize
-- **Parallel Execution**: Run evaluations concurrently for better performance
+- **Simple Primitives**: Essential building blocks without complexity
+- **Flexible Implementation**: Easily customizable prompts and evaluation logic
+- **No Infrastructure Lock-in**: Runs in any environment
+- **LLM Flexibility**: Works with any LLM compatible with Instructor
 
-## Implemented Metrics
+## Core Components
 
-RAG Evals currently implements these key evaluation metrics:
+The repository is organized as:
 
-### 1. Faithfulness (Answer Grounding)
+```
+rag_evals/
+├── base.py              # Base evaluation classes
+├── metrics/             # Metrics implementations
+│   ├── __init__.py
+│   ├── faithfulness.py  # Faithfulness evaluation (A|C)
+│   ├── precision.py     # Context precision evaluation (C|Q)
+│   └── relevance.py     # Answer relevance evaluation (A|Q)
+```
 
-Measures whether the generated answer contains only factual claims supported by the retrieved context. It helps detect hallucinations (made-up information).
+## Evaluation Framework
 
-- **Input**: Question, Answer, Retrieved Context
-- **Output**: Statement-level breakdown of which claims are supported, with specific attribution to context chunks
+RAG Evals implements a systematic decomposition of RAG evaluations based on the relationships between:
 
-### 2. Context Precision (Chunk Utility)
+1. **Question (Q)**: The user's original query
+2. **Context Chunks (C)**: The pieces of information retrieved from a knowledge base
+3. **Answer (A)**: The response generated based on the question and context
 
-Evaluates whether each individual retrieved context chunk was useful in generating the answer.
+### Implemented Metrics
 
-- **Input**: Question, Answer, Retrieved Context
-- **Output**: Binary score for each chunk indicating whether it contributed to the answer
+1. **Context Relevance (C|Q)**: `ChunkPrecision` in `metrics/precision.py`
+   - Evaluates if each context chunk is relevant to the question
+   - Also known as: Context Precision, Retrieval Relevance, Contextual Relevancy
 
-## Installation
+2. **Faithfulness (A|C)**: `Faithfulness` in `metrics/faithfulness.py`
+   - Evaluates if the answer is factually consistent with the context
+   - Also known as: Factuality, Correctness, Answer Grounding
+
+3. **Answer Relevance (A|Q)**: `AnswerRelevance` in `metrics/relevance.py`
+   - Evaluates how well the answer addresses the question
+   - Also known as: Response Relevance, Query-Response Relevance
+
+## Usage Instructions
+
+### Installing
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Quick Start
+### Basic Usage
 
 ```python
 import instructor
-from rag_evals.score_faithfulness import Faithfulness
-from rag_evals.score_precision import ChunkPrecision
+from rag_evals import Faithfulness, ChunkPrecision, AnswerRelevance
 
-# Initialize with your preferred LLM
+# Initialize with LLM
 client = instructor.from_provider("openai/gpt-4o-mini")
 
-# Evaluate Faithfulness
+# Sample RAG output
 question = "What are the benefits of exercise?"
 answer = "Regular exercise improves cardiovascular health and increases strength."
 context = [
@@ -70,7 +75,7 @@ context = [
     "The earliest Olympic games were held in Ancient Greece."
 ]
 
-# Run evaluations
+# Evaluate faithfulness
 faithfulness_result = Faithfulness.grade(
     question=question,
     answer=answer,
@@ -78,13 +83,7 @@ faithfulness_result = Faithfulness.grade(
     client=client
 )
 
-print(f"Overall Faithfulness Score: {faithfulness_result.overall_faithfulness_score}")
-for statement in faithfulness_result.statements:
-    print(f"- {statement.statement}: {'Supported' if statement.is_supported else 'Unsupported'}")
-    if statement.is_supported:
-        print(f"  Supported by chunks: {statement.supporting_chunk_ids}")
-
-# Evaluate Context Precision
+# Evaluate context precision
 precision_result = ChunkPrecision.grade(
     question=question,
     answer=answer,
@@ -92,56 +91,44 @@ precision_result = ChunkPrecision.grade(
     client=client
 )
 
-print(f"Overall Precision Score: {precision_result.avg_score}")
-for chunk in precision_result.graded_chunks:
-    print(f"- Chunk {chunk.id_chunk}: {'Used' if chunk.score else 'Not Used'}")
+# Evaluate answer relevance
+relevance_result = AnswerRelevance.grade(
+    question=question,
+    answer=answer,
+    context=context,
+    client=client
+)
+```
 
-# Parallel execution example
+### Parallel Evaluation
+
+For better performance, use async methods:
+
+```python
 import asyncio
 from instructor import AsyncInstructor
 
-async_client = AsyncInstructor(...)
+async_client = AsyncInstructor(provider="openai/gpt-4o-mini")
 
 async def run_evals():
-    # Run multiple evaluations in parallel
-    faithfulness_task = Faithfulness.agrade(
-        question=question,
-        answer=answer,
-        context=context,
-        client=async_client
+    faithfulness_task = Faithfulness.agrade(question, answer, context, async_client)
+    precision_task = ChunkPrecision.agrade(question, answer, context, async_client)
+    relevance_task = AnswerRelevance.agrade(question, answer, context, async_client)
+    
+    results = await asyncio.gather(
+        faithfulness_task, precision_task, relevance_task
     )
     
-    precision_task = ChunkPrecision.agrade(
-        question=question,
-        answer=answer,
-        context=context,
-        client=async_client
-    )
-    
-    # Await results
-    faithfulness_result, precision_result = await asyncio.gather(
-        faithfulness_task, 
-        precision_task
-    )
-    
-    return faithfulness_result, precision_result
-
-# Run the async function
-faithfulness_result, precision_result = asyncio.run(run_evals())
+    return results
 ```
 
-## Customizing Prompts
+### Customizing Prompts
 
-All evaluation logic is defined in prompts that you can easily modify:
+All evaluation logic is in customizable prompts:
 
 ```python
-# Modify the faithfulness prompt
-from rag_evals.score_faithfulness import Faithfulness
+from rag_evals import base, FaithfulnessResult
 
-# Access the original prompt
-original_prompt = Faithfulness.prompt
-
-# Create a customized evaluator with your own prompt
 CustomFaithfulness = base.ContextEvaluation(
     prompt="Your custom prompt here...",
     response_model=FaithfulnessResult
@@ -150,24 +137,48 @@ CustomFaithfulness = base.ContextEvaluation(
 
 ## Documentation
 
-For more detailed information about RAGAS evaluation metrics and best practices:
+Documentation is built with MkDocs using the Material theme and is organized as:
 
-- [Understanding RAG Evaluation Metrics](rag-evals/metrics_explained.md)
-- [RAGAS Evaluation Best Practices](rag-evals/tips.md)
+- **Home**: Overview and quick start
+- **Metrics**:
+  - Overview of all metrics
+  - Faithfulness details
+  - Context Precision details
+  - Answer Relevance details
+  - Systematic Decomposition of evaluations
+- **Usage Guide**:
+  - Basic usage
+  - Customization
+  - Examples
+  - Best Practices
+  - Troubleshooting
+- **API Reference**: Detailed API docs
 
-## Future Work
+### Building Documentation
 
-Future plans include:
+To build the documentation:
 
-- **Data Inspection Tools**: Utilities to explore and visualize evaluation results
-- **Additional Metrics**: Answer Relevancy, Context Recall, etc.
+```bash
+python -m mkdocs build
+```
+
+To serve locally:
+
+```bash
+python -m mkdocs serve
+```
+
+## Development Notes
+
+- Use uv instead of pip for package management
+- Avoid mocking in tests - test with real functionality
+- Keep all prompts and models in the `metrics/` directory
+- Follow the systematic decomposition approach when adding new metrics
+- Ensure compatibility with Instructor for all metrics
+
+## Future Plans
+
+- **Additional Metrics**: Context Recall, Chunk Utility, etc.
 - **Batch Processing**: Efficiently evaluate large datasets
-- **Reference Implementations**: Common evaluation pipelines and patterns
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-MIT
+- **Data Inspection Tools**: Visualize and explore results
+- **Reference Implementations**: Common evaluation pipelines
