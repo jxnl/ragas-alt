@@ -1,6 +1,9 @@
-mkdocs-material
-pytest
-instructor
-pydantic
+instructor>=0.4.0
+pydantic>=2.0.0
+pytest>=7.0
 pytest-cov
 pytest-asyncio
+ruff
+mypy
+mkdocs
+mkdocs-material
