@@ -1,0 +1,6 @@
+mkdocs-material
+pytest
+instructor
+pydantic
+pytest-cov
+pytest-asyncio
