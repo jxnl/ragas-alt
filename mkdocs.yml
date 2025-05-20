@@ -63,4 +63,6 @@ nav:
     - Examples: usage/examples.md
     - Best Practices: usage/best_practices.md
     - Troubleshooting: usage/troubleshooting.md
-  - API Reference: api/index.md
+  - API Reference: 
+      - Overview: api/index.md
+      - Utility Functions: api/utils.md
