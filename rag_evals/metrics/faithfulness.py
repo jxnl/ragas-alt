@@ -2,11 +2,10 @@ from __future__ import annotations
 import logging
 from typing import Optional, Any
 from pydantic import BaseModel, Field, field_validator, ValidationInfo, model_validator
-from . import base
+from .. import base
 
 logger = logging.getLogger(__name__)
 
-# Moved Pydantic Models for Structured Faithfulness Evaluation
 class StatementEvaluation(BaseModel):
     statement: str = Field(description="An individual claim extracted from the generated answer.")
     is_supported: bool = Field(description="Is this statement supported by the provided context chunks?")
@@ -111,4 +110,4 @@ Faithfulness = base.ContextEvaluation(
     -   Pay close attention to the 0-indexed integer IDs of the context chunks provided in the input when listing `supporting_chunk_ids`.
     """,
     response_model=FaithfulnessResult
-) 
+)

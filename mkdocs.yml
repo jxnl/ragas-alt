@@ -1,4 +1,66 @@
-site_name: My Docs
+site_name: RAG Evals
+site_description: Simple, modular primitives for evaluating RAG systems using LLMs
+site_url: https://docs.ragevals.com/
+repo_url: https://github.com/jxnl/rag-evals
+repo_name: jxnl/rag-evals
+
 theme:
   name: material
-docs_dir: rag-evals
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - footnotes
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+docs_dir: docs
+
+nav:
+  - Home: index.md
+  - Metrics:
+    - metrics/index.md
+    - Faithfulness: metrics/faithfulness.md
+    - Context Precision: metrics/precision.md
+    - Answer Relevance: metrics/relevance.md
+    - Systematic Decomposition: metrics/systematic-decomposition.md
+  - Usage Guide:
+    - usage/index.md
+    - Customization: usage/customization.md
+    - Examples: usage/examples.md
+    - Best Practices: usage/best_practices.md
+    - Troubleshooting: usage/troubleshooting.md
+  - API Reference: api/index.md

@@ -5,7 +5,7 @@ def test_chunk_graded_validation():
     """Test ChunkGraded model with context validation"""
     # Context with 3 chunks
     context_strings_list = ["Chunk 0", "Chunk 1", "Chunk 2"]
-    context_structured_list = [{"id": 0, "text": "Chunk 0"}, {"id": 1, "text": "Chunk 1"}, {"id": 2, "text": "Chunk 2"}]
+    context_structured_list = [{"id": i, "text": text} for i, text in enumerate(context_strings_list)]
     
     # Valid chunks
     model_data_valid = {
@@ -19,6 +19,9 @@ def test_chunk_graded_validation():
 
     assert valid_graded.graded_chunks[0].id_chunk == 0
     assert valid_graded.graded_chunks[1].id_chunk == 1
+    
+    # Note that the third chunk is not included in the model_data_valid, but it is included in the context
+    # and thus the score is 0 (default)
     assert valid_graded.graded_chunks[2].score == 0
     
     # Invalid chunks - should raise ValidationError
