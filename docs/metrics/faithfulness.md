@@ -37,17 +37,35 @@ faithfulness_result = Faithfulness.grade(
 The `FaithfulnessResult` class contains:
 
 ```python
+from pydantic import BaseModel, Field
+from typing import Optional, List
+
 class StatementEvaluation(BaseModel):
-    statement: str  # An individual claim extracted from the answer
-    is_supported: bool  # Whether the statement is supported by context
-    supporting_chunk_ids: Optional[list[int]]  # IDs of supporting chunks
-    
+    statement: str = Field(description="An individual claim extracted from the generated answer.")
+    is_supported: bool = Field(description="Is this statement supported by the provided context chunks?")
+    supporting_chunk_ids: Optional[List[int]] = Field(
+        default=None,
+        description="A list of chunk IDs (0-indexed integers) from the provided context that support this statement. Null if not supported or if IDs are not applicable/found."
+    )
+    # Note: The evaluation prompt for Faithfulness (used by the LLM to generate the data for this model)
+    # also requests a 'reasoning' field for each statement. However, this 'reasoning' field
+    # is not currently defined in the StatementEvaluation Pydantic model above. Therefore,
+    # while the LLM might generate reasoning, it won't be parsed into and available in the
+    # FaithfulnessResult object.
+
 class FaithfulnessResult(BaseModel):
-    statements: list[StatementEvaluation]  # All evaluated statements
-    
+    statements: List[StatementEvaluation] = Field(description="A list of all statements extracted from the answer and their evaluation.")
+
     @property
-    def overall_faithfulness_score(self) -> float:
-        # Calculates the proportion of supported statements
+    def score(self) -> float:
+        """
+        Calculates the overall faithfulness score.
+        This is the proportion of statements that are supported by the context.
+        """
+        if not self.statements:
+            return 0.0
+        supported_statements = sum(s.is_supported for s in self.statements)
+        return supported_statements / len(self.statements)
 ```
 
 ### Example Output
@@ -69,7 +87,7 @@ faithfulness_result = FaithfulnessResult(
     ]
 )
 
-# Overall score: 1.0 (both statements are supported)
+# Faithfulness score: 1.0 (calculated via faithfulness_result.score)
 ```
 
 ## Customizing the Evaluation

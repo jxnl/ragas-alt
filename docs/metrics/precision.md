@@ -37,16 +37,27 @@ precision_result = ChunkPrecision.grade(
 The ChunkPrecision evaluator uses the base `ChunkGradedBinary` class:
 
 ```python
+from pydantic import BaseModel
+from typing import List
+
 class ChunkBinaryScore(BaseModel):
     id_chunk: int  # ID of the chunk being evaluated
-    score: bool  # Whether the chunk is relevant (True) or not (False)
-    
-class ChunkGradedBinary(BaseModel, ContextValidationMixin):
-    graded_chunks: list[ChunkBinaryScore]  # All evaluated chunks
-    
-    @property 
-    def avg_score(self) -> float:
-        # Calculates the proportion of relevant chunks
+    score: bool    # Whether the chunk is relevant (True) or not (False) to the question
+
+class ChunkGradedBinary(BaseModel): # Assuming ContextValidationMixin is part of base models, not detailed here for brevity
+    graded_chunks: List[ChunkBinaryScore]  # All evaluated chunks
+
+    @property
+    def score(self) -> float:
+        """
+        Calculates the overall context precision score.
+        This is the proportion of retrieved context chunks that are relevant to the question.
+        """
+        if not self.graded_chunks:
+            return 0.0
+        # chunk.score is a boolean (True for relevant, False for not relevant)
+        relevant_chunks = sum(chunk.score for chunk in self.graded_chunks)
+        return relevant_chunks / len(self.graded_chunks)
 ```
 
 ### Example Output
@@ -61,7 +72,7 @@ precision_result = ChunkGradedBinary(
     ]
 )
 
-# Overall score: 0.6667 (2/3 chunks were relevant)
+# Precision score: 0.6667 (calculated via precision_result.score)
 ```
 
 ## Customizing the Evaluation
