@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 from pydantic import BaseModel, ValidationInfo, field_validator, Field
 from instructor import Instructor, AsyncInstructor
 from textwrap import dedent

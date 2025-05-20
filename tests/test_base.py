@@ -1,5 +1,5 @@
 import pytest
-from rag_evals.base import ChunkScore, ChunkGraded, ChunkGradedBinary
+from rag_evals.base import ChunkScore, ChunkGraded
 
 def test_chunk_graded_validation():
     """Test ChunkGraded model with context validation"""
