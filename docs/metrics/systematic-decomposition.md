@@ -219,7 +219,7 @@ def evaluate_rag_system(question, retrieved_context, generated_answer, ground_tr
 
 ## Relationship to RAG Evals Implementation
 
-The RAG Evals library implements all three key relationships:
+The RAG Evals library implements metrics across all these key relationships:
 
 1. **Context Relevance (C|Q)**: Implemented as `ChunkPrecision` in `metrics/precision.py`
    - Evaluates how well each context chunk matches the question
@@ -229,6 +229,12 @@ The RAG Evals library implements all three key relationships:
 
 3. **Answer Relevance (A|Q)**: Implemented as `AnswerRelevance` in `metrics/relevance.py`
    - Evaluates how well the answer addresses the original question
+
+4. **Context Utilization (C↔A)**: 
+   - Implemented as `ContextRecall` in `metrics/recall.py` (C→A direction)
+      - Evaluates whether all relevant information from the context is included in the answer
+   - Implemented as `ChunkUtility` in `metrics/utility.py` (also considers both C→A and Q→A)
+      - Evaluates how useful each context chunk was for generating the answer
 
 ## Advantages of Systematic Decomposition
 
