@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 backend-path = ["."]
 
 [project]
-name = "ragas-alt"  # Replace with your actual project name
+name = "ragas-alt"
 version = "0.1.0"
-description = "A short description of your project." # Replace with your actual description
+description = "Simple, modular primitives for evaluating RAG systems using LLMs"
 readme = "README.md" # Optional: if you have a README.md
 requires-python = ">=3.8"
 license = {text = "MIT"} # Or any other license
 authors = [
-    {name = "Your Name", email = "you@example.com"}, # Replace with your details
+    {name = "Jason Liu", email = "jason@jxnl.co"},
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -27,47 +27,43 @@ classifiers = [
 ]
 
 dependencies = [
-    # Add your project's core dependencies here, e.g.:
-    # "requests>=2.20.0",
-    # "numpy",
+    "instructor>=0.4.0",
+    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
 test = [
     "pytest>=7.0",
     "pytest-cov",
-    "pytest-asyncio",
-    # Add other test-specific dependencies here
+    "pytest-asyncio"
 ]
 lint = [
     "ruff",
-    "mypy",
-    # Add other linting/formatting dependencies here
+    "mypy"
 ]
 docs = [
     "mkdocs",
-    # Add other documentation-specific dependencies here, e.g.:
-    # "mkdocs-material",
+    "mkdocs-material"
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/ragas-alt"  # Replace with your project's URL
-"Bug Tracker" = "https://github.com/yourusername/ragas-alt/issues" # Replace
+"Homepage" = "https://github.com/jxnl/ragas-alt"
+"Bug Tracker" = "https://github.com/jxnl/ragas-alt/issues"
 
 # You can add tool-specific configurations below, for example:
-# [tool.pytest.ini_options]
-# minversion = "6.0"
-# addopts = "-ra -q"
-# testpaths = [
-#     "tests",
-# ]
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
 
-# [tool.ruff]
-# line-length = 88
-# select = ["E", "F", "W", "I", "UP", "PL", "N"] # Example rule set
-# ignore = []
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "UP", "PL", "N"]
+ignore = []
 
-# [tool.mypy]
-# python_version = "3.10"
-# warn_return_any = true
-# warn_unused_configs = true 
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true 
