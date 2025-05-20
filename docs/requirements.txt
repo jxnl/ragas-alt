@@ -1,0 +1,4 @@
+mkdocs>=1.4.0
+mkdocs-material>=8.5.10
+mkdocs-raw-view-markdown>=1.0.1
+pymdown-extensions>=9.9.0

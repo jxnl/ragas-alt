@@ -4,6 +4,9 @@
 
 This repository provides simple, modular primitives for evaluating RAG (Retrieval Augmented Generation) systems using LLMs. Created by the author of Instructor, it focuses on lightweight evaluation that doesn't require extensive infrastructure.
 
+**Repository:** [jxnl/ragas-alt](https://github.com/jxnl/ragas-alt)  
+**Documentation:** [RAG Evals Documentation](https://jxnl.github.io/ragas-alt/)
+
 ## Philosophy
 
 RAG Evals is built on the principle that RAG evaluation doesn't need to be complex. Key principles:
