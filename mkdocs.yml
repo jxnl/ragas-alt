@@ -1,8 +1,8 @@
 site_name: RAG Evals
 site_description: Simple, modular primitives for evaluating RAG systems using LLMs
-site_url: https://docs.ragevals.com/
-repo_url: https://github.com/jxnl/rag-evals
-repo_name: jxnl/rag-evals
+site_url: https://jxnl.github.io/ragas-alt/
+repo_url: https://github.com/jxnl/ragas-alt
+repo_name: jxnl/ragas-alt
 
 theme:
   name: material
@@ -47,6 +47,10 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 
+plugins:
+  - search
+  - mkdocs-raw-view-markdown
+
 docs_dir: docs
 
 nav:
@@ -57,6 +61,7 @@ nav:
     - Context Precision: metrics/precision.md
     - Answer Relevance: metrics/relevance.md
     - Systematic Decomposition: metrics/systematic-decomposition.md
+    - Metrics Interaction: metrics/interaction.md
   - Usage Guide:
     - usage/index.md
     - Customization: usage/customization.md
