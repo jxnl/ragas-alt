@@ -11,7 +11,7 @@ readme = "README.md" # Optional: if you have a README.md
 requires-python = ">=3.8"
 license = {text = "MIT"} # Or any other license
 authors = [
-    {name = "Jason Liu", email = "jason@jxnl.co"},
+    {name = "Jason Liu"},
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

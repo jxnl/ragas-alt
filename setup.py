@@ -10,7 +10,6 @@ setup(
     ],
     # Add other metadata like author, description, etc.
     author="Jason Li",
-    author_email="jason@jxnl.co",
     description="RAGAs-Alt is a library for evaluating RAG systems.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
